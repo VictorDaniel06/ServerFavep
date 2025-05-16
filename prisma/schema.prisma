@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int                    @id @default(autoincrement())
+  name          String
+  email         String                 @unique
+  password      String
+  telefone      String
+  fotoPerfil    String?
+  cpf           String?                @unique
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  financas      GerenciaFinancas[]
+  maquinarios   GerenciaMaquinario[]
+  movimentacoes GerenciaMovimentacao[]
+  producoes     GerenciaProducao[]
+  propriedades  GerenciaPropriedade[]
+}
+
+model GerenciaPropriedade {
+  id            Int                    @id @default(autoincrement())
+  nome          String
+  area          Float
+  localizacao   String
+  produtividade String
+  cultura       String
+  userId        Int
+  financas      GerenciaFinancas[]
+  maquinarios   GerenciaMaquinario[]
+  movimentacoes GerenciaMovimentacao[]
+  producoes     GerenciaProducao[]
+  user          User                   @relation(fields: [userId], references: [id])
+}
+
+model GerenciaMaquinario {
+  id            Int                 @id @default(autoincrement())
+  marca         String
+  modelo        String
+  ano           Int
+  tipo          String
+  status        String
+  kmRodado      Float
+  propriedadeId Int
+  userId        Int
+  propriedade   GerenciaPropriedade @relation(fields: [propriedadeId], references: [id])
+  user          User                @relation(fields: [userId], references: [id])
+}
+
+model GerenciaProducao {
+  id            Int                 @id @default(autoincrement())
+  cultura       String
+  safra         String
+  quantidade    Float
+  area          Float
+  data          DateTime
+  propriedadeId Int
+  userId        Int
+  propriedade   GerenciaPropriedade @relation(fields: [propriedadeId], references: [id])
+  user          User                @relation(fields: [userId], references: [id])
+}
+
+model GerenciaMovimentacao {
+  id            Int                 @id @default(autoincrement())
+  tipo          String
+  descricao     String
+  valor         Float
+  data          DateTime
+  categoria     String
+  propriedadeId Int
+  userId        Int
+  financas      GerenciaFinancas[]
+  propriedade   GerenciaPropriedade @relation(fields: [propriedadeId], references: [id])
+  user          User                @relation(fields: [userId], references: [id])
+}
+
+model GerenciaFinancas {
+  id             Int                  @id @default(autoincrement())
+  lucro          Float
+  despesa        Float
+  total          Float
+  propriedadeId  Int
+  movimentacaoId Int
+  userId         Int
+  movimentacao   GerenciaMovimentacao @relation(fields: [movimentacaoId], references: [id])
+  propriedade    GerenciaPropriedade  @relation(fields: [propriedadeId], references: [id])
+  user           User                 @relation(fields: [userId], references: [id])
+}
